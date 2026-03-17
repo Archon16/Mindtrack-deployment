@@ -1,91 +1,87 @@
-DevOps Practice Project – Dist Directory
+Project Summary: Brain Tasks App - Full DevOps Pipeline
 
-This repository contains the production-ready build files (dist folder) for DevOps practice and deployment exercises.
+Task 1: Application Setup
 
-It is intentionally structured to focus on CI/CD pipelines, hosting, containerization, and infrastructure setup rather than application development.
+Cloned the repository from GitHub: https://github.com/Vennilavanguvi/Brain-Tasks-App.git
+Discovered the app is a static HTML application (no package.json)
+App files included: index.html, vite.svg, and assets/ folder
 
-📁 What This Repository Contains
+Task 2: Dockerization
 
-dist/ – Compiled and production-ready static files
+Identified app as static HTML — used Nginx Alpine as base image instead of Node.js
+Created Dockerfile with:
 
-HTML
+Nginx serving files from /usr/share/nginx/html
+Custom Nginx config to serve on port 3000
+Built Docker image: brain-tasks-app:latest
+Ran container with docker run -d -p 3000:3000
+Verified app running at http://localhost:3000
 
-CSS
+Task 3: AWS ECR Registry
 
-JavaScript
+Configured AWS CLI with credentials using aws configure
+Created ECR repository: brain-tasks-app
+Authenticated Docker to ECR using aws ecr get-login-password
+Tagged image with ECR URI format:
+<account-id>.dkr.ecr.us-east-1.amazonaws.com/brain-tasks-app:latest
+Pushed Docker image to ECR
+Verified image in ECR console
 
-Assets (images, fonts, etc.)
+Task 4: Kubernetes on AWS EKS
 
-These files are ready to deploy to:
+Installed eksctl and kubectl tools
+Created EKS cluster:
+Cluster name: brain-tasks-cluster
+Node type: t3.medium
+Node count: 2
+Region: us-east-1
 
-Web servers (Nginx / Apache)
+Updated kubeconfig: aws eks update-kubeconfig
+Created deployment.yaml with:
+2 replicas
+ECR image reference
+Resource requests and limits
 
-Cloud platforms (AWS S3, Azure Blob, GCP Storage)
+Created service.yaml with:
+Type: LoadBalancer
+Port 80 → Container port 3000
 
-Containerized environments (Docker + Nginx)
+Applied YAML files using kubectl apply
+Retrieved LoadBalancer external DNS for submission
 
-Kubernetes clusters
+Task 5: AWS CodeBuild
 
-CI/CD pipeline demonstrations
+Pushed all code to GitHub repository
+Created buildspec.yml with 4 phases:
 
-🎯 Purpose of This Repository
+Install: Download and install kubectl
+Pre-build: ECR login, set image tag from commit hash
+Build: Docker build and tag image
+Post-build: Push to ECR, update kubeconfig, deploy to EKS
 
-This repository is designed for:
+Created IAM Role CodeBuildEKSRole with policies:
+AmazonEC2ContainerRegistryFullAccess
+AmazonEKSClusterPolicy
+AmazonEKSWorkerNodePolicy
+CloudWatchLogsFullAccess
+AmazonS3FullAccess
 
-DevOps beginners
+Mapped CodeBuild IAM role to EKS using eksctl create iamidentitymapping
+Created CodeBuild project:
+Source: GitHub
+Environment: Ubuntu, Standard 7.0
+Privileged mode: Enabled (for Docker)
+Buildspec: buildspec.yml
+Logs: CloudWatch enabled
 
-CI/CD practice
+Successfully ran build and deployed to EKS
 
-Deployment pipeline testing
+Task 6: AWS CodePipeline
 
-Docker & Kubernetes deployment exercises
+Created pipeline: brain-tasks-pipeline
+Connected 3 stages:
 
-Web server configuration practice
-
-Reverse proxy and load balancer setup
-
-The goal is to simulate real-world deployment scenarios using already built application files.
-
-❓ Why is there NO package.json?
-
-You may notice that this repository does not include:
-
-package.json
-
-node_modules
-
-Source code (src/)
-
-Build tools configuration
-
-✅ Reason:
-
-This repository only contains the final production build output (dist), not the development source code.
-
-In a typical project:
-
-Developers write source code.
-
-The project is built using tools like:
-
-Node.js
-
-Webpack
-
-Vite
-
-React (or other frameworks)
-
-A dist/ folder is generated.
-
-Only the production build is deployed to servers.
-
-This repository represents step 4 only.
-
-Since this is already the compiled output:
-
-No dependencies are required
-
-No build process is required
-
-No package.json is needed
+Source: GitHub (Version 2) with webhooks
+Build: AWS CodeBuild brain-tasks-build
+Deploy: EKS via CodeBuild
+Pipeline auto-triggers on every git push to main branch
