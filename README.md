@@ -1,12 +1,12 @@
-Project Summary: Brain Tasks App - Full DevOps Pipeline
+# Project Summary: Brain Tasks App - Full DevOps Pipeline
 
-Task 1: Application Setup
+## Application Setup
 
 Cloned the repository from GitHub: https://github.com/Vennilavanguvi/Brain-Tasks-App.git
 Discovered the app is a static HTML application (no package.json)
 App files included: index.html, vite.svg, and assets/ folder
 
-Task 2: Dockerization
+## Dockerization
 
 Identified app as static HTML — used Nginx Alpine as base image instead of Node.js
 Created Dockerfile with:
@@ -17,7 +17,7 @@ Built Docker image: brain-tasks-app:latest
 Ran container with docker run -d -p 3000:3000
 Verified app running at http://localhost:3000
 
-Task 3: AWS ECR Registry
+## AWS ECR Registry
 
 Configured AWS CLI with credentials using aws configure
 Created ECR repository: brain-tasks-app
@@ -27,18 +27,18 @@ Tagged image with ECR URI format:
 Pushed Docker image to ECR
 Verified image in ECR console
 
-Task 4: Kubernetes on AWS EKS
+## Kubernetes on AWS EKS
 
 Installed eksctl and kubectl tools
 Created EKS cluster:
 Cluster name: brain-tasks-cluster
-Node type: t3.medium
+Node type: t3.micro
 Node count: 2
 Region: us-east-1
 
 Updated kubeconfig: aws eks update-kubeconfig
 Created deployment.yaml with:
-2 replicas
+1 replicas
 ECR image reference
 Resource requests and limits
 
@@ -49,7 +49,7 @@ Port 80 → Container port 3000
 Applied YAML files using kubectl apply
 Retrieved LoadBalancer external DNS for submission
 
-Task 5: AWS CodeBuild
+## AWS CodeBuild
 
 Pushed all code to GitHub repository
 Created buildspec.yml with 4 phases:
@@ -76,12 +76,12 @@ Logs: CloudWatch enabled
 
 Successfully ran build and deployed to EKS
 
-Task 6: AWS CodePipeline
+## AWS CodePipeline
 
 Created pipeline: brain-tasks-pipeline
 Connected 3 stages:
 
-Source: GitHub (Version 2) with webhooks
+Source: GitHub with webhooks
 Build: AWS CodeBuild brain-tasks-build
 Deploy: EKS via CodeBuild
 Pipeline auto-triggers on every git push to main branch
